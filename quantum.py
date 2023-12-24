@@ -1,50 +1,40 @@
 import streamlit as st
-import math
-import pandas as pd
+import qiskit
+from qiskit import QuantumCircuit
+from qiskit_ibm_runtime import QiskitRuntimeService, Sampler
 
-import streamlit as st
-from qiskit import QuantumCircuit, transpile, assemble
-from qiskit.providers.ibmq import least_busy
-from qiskit import IBMQ
-from qiskit.visualization import plot_bloch_multivector, plot_histogram
-# Define the speeds and masses
-speeds = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]  # Velocity as a percentage of the speed of light
-masses = [1, 10, 100, 1000, 10000]  # Mass in kilograms
+def main():
+    st.title("Quantum Circuit")
 
-# Create a DataFrame with the mass for each combination of mass and speed
-data = {f"{speed * 100}% c": masses for speed in speeds}
-df = pd.DataFrame(data)
+    if st.button('Run Quantum Circuit'):
+        # Create empty circuit
+        example_circuit = QuantumCircuit(2)
+        example_circuit.measure_all()
 
-# Display the DataFrame as a table
-st.table(df)
+        # You'll need to specify the credentials when initializing QiskitRuntimeService, if they were not previously saved.
+        service = QiskitRuntimeService(channel="ibm_quantum", token="d79a58cef57641543701b758b34f4eab6b344d1d52a9e18e3d42695dc153028be326695f1388c5b276d36c4a963d1ba15be8ed096a3cfe79be3559411529758c")
+        backend = service.backend("ibmq_qasm_simulator")
+        job = Sampler(backend).run(example_circuit)
+        job_id = job.job_id()
+        st.write(f"Job ID: {job_id}")  # Display the job id
+        result = job.result()
+        st.write(result)  # Display the result
 
-# Load IBM Q account
-IBMQ.load_account()
+        # Create a new circuit with two qubits (first argument) and two classical bits (second argument)
+        qc = QuantumCircuit(2)
 
-# Define a quantum circuit for multiplication
-qc = QuantumCircuit(2)
-qc.h(0)
-qc.cx(0, 1)
-qc.draw('mpl')
+        # Add a Hadamard gate to qubit 0
+        qc.h(0)
 
-# Display the quantum circuit
-st.write(qc)
+        # Perform a controlled-X gate on qubit 1, controlled by qubit 0
+        qc.cx(0, 1)
 
-# Explanation
-st.write("""
-This is a simple quantum circuit that applies a Hadamard gate to the first qubit (putting it into a superposition of states), 
-and then a CNOT gate (controlled NOT gate) with the first qubit as control and the second as target. 
-The result is an entangled state where the state of the second qubit is always the same as the state of the first qubit.
-""")
+        # Return a drawing of the circuit using MatPlotLib ("mpl"). This is the last line of the cell, so the drawing appears in the cell output.
+        # Remove the "mpl" argument to get a text drawing.
+        figure = qc.draw("mpl")
+        figure.savefig("circuit.png")
 
-# Button to run the circuit on a quantum computer
-if st.button('Run on Quantum Computer'):
-    provider = IBMQ.get_provider(hub='ibm-q')
-    backend = least_busy(provider.backends(filters=lambda x: x.configuration().n_qubits >= 2 and not x.configuration().simulator and x.status().operational==True))
-    transpiled_circuit = transpile(qc, backend, optimization_level=3)
-    qobj = assemble(transpiled_circuit)
-    job = backend.run(qobj)
-    
-    # Get the result and display it
-    result = job.result()
-    st.write(result.get_counts())
+        # Display the image
+        st.image("circuit.png")
+
+main()
