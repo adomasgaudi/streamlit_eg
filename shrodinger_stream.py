@@ -2,8 +2,10 @@ import streamlit as st
 from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit
 from qiskit_aer import AerSimulator
 
+st.title("Schrodinger's Cat")
+st.title("Quantum Circuit")
+
 def main():
-    st.title("Quantum Circuit")
 
     if st.button('Run Quantum Circuit'):
         qr_atom = QuantumRegister(1, name="atom")
