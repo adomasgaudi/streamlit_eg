@@ -1,3 +1,0 @@
-streamlit
-qiskit
-qiskit-aer
