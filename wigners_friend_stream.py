@@ -1,11 +1,11 @@
 import streamlit as st
 from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit
-# from qiskit_aer import AerSimulator
+from qiskit_aer import AerSimulator
 
 st.title("Schrodinger's Cat")
 st.title("Quantum Circuit")
 
-# def main():
+def main():
 
 #     if st.button('Run Quantum Circuit'):
 #         qr_atom = QuantumRegister(1, name="atom")
@@ -13,8 +13,8 @@ st.title("Quantum Circuit")
 #         qc.h(qr_atom)   
 #         qc.draw('mpl')
 
-#         backend = AerSimulator()
-
+        backend = AerSimulator()
+        print(backend)
 #         qr_cat = QuantumRegister(1, name="cat")
 #         qc = QuantumCircuit(qr_atom, qr_cat)
 #         qc.h(qr_atom[0])
@@ -35,4 +35,4 @@ st.title("Quantum Circuit")
 #         figure.savefig("circuit.png")
 #         st.image("circuit.png")
 
-# main()
+main()
