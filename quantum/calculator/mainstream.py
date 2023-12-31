@@ -1,51 +1,58 @@
 import streamlit as st
-from qiskit import QuantumCircuit, ClassicalRegister, QuantumRegister, Aer, transpile
+from qiskit import QuantumCircuit, Aer, transpile
 from qiskit.visualization import plot_histogram
 
 # Streamlit Title
 st.title("Quantum 2-Bit Binary Adder")
 
-# Function to create a full adder circuit
-def full_adder(qc, a, b, c, s, carry_out):
-    qc.ccx(a, b, carry_out)
-    qc.cx(a, b)
-    qc.ccx(c, b, carry_out)
-    qc.cx(c, b)
-    qc.cx(a, b)
-    qc.measure([carry_out, b], [s, s+1])  # reversed order of measurements
-
-# Quantum circuit for a 2-bit adder
+# Function to create a 2-bit binary adder circuit
 def create_2bit_adder_circuit(a0, a1, b0, b1):
-    # Quantum Registers: 6 qubits
-    # qr = QuantumRegister(6, name="q")
-    qr0 = QuantumRegister(1, name="a0")
-    qr1 = QuantumRegister(1, name="a1")
-    qr2 = QuantumRegister(1, name="b0")
-    qr3 = QuantumRegister(1, name="b1")
-    qr4 = QuantumRegister(1, name="carry_in")
-    qr5 = QuantumRegister(1, name="carry_out")
+    tba = QuantumCircuit(11, 3)
 
-    cr = ClassicalRegister(3, name="output")
+    # Step 1: Encode input
+    if a0: tba.x(0) # LSB of first number
+    if a1: tba.x(1) # MSB of first number
+    if b0: tba.x(2) # LSB of second number
+    if b1: tba.x(3) # MSB of second number
 
-    # Quantum Circuit
-    qc = QuantumCircuit(qr0, qr1, qr2, qr3, qr4, qr5, cr)
-    # Classical Registers: 3 bits for output (2 sum bits + 1 carry)
-    # cr = ClassicalRegister(3, name="output")
-    # qc = QuantumCircuit(qr, cr)
+    tba.barrier()
 
-    # Setting up the input states
-    if a0 == 1: qc.x(qr0[0]) # LSB of first number
-    if a1 == 1: qc.x(qr1[0]) # MSB of first number
-    if b0 == 1: qc.x(qr2[0]) # LSB of second number
-    if b1 == 1: qc.x(qr3[0]) # MSB of second number
+    # Step 2: Operations
+    # Adding 2^0 bit
+    tba.cx(0, 4)
+    tba.cx(2, 4)
 
-    # First full adder (least significant bits)
-    full_adder(qc, qr0[0], qr2[0], qr4[0], 0, qr5[0]) # qr4[0] is carry-in (initially 0)
+    tba.barrier()
 
-    # Second full adder (most significant bits)
-    full_adder(qc, qr1[0], qr3[0], qr5[0], 1, qr4[0]) # qr5[0] is carry-out from first adder
+    # Adding 2^1 bit
+    tba.ccx(0, 2, 5)
+    tba.cx(1, 6)
+    tba.cx(3, 6)
+    tba.cx(5, 7)
+    tba.cx(6, 7)
 
-    return qc
+    tba.barrier()
+
+    # Adding 2^2 bit
+    tba.ccx(5, 6, 8)
+    tba.ccx(1, 3, 9)
+
+    tba.barrier()
+
+    # Constructing OR gate for 2^2 bit
+    tba.x(8)
+    tba.x(9)
+    tba.ccx(8, 9, 10)
+    tba.x(10)
+
+    tba.barrier()
+
+    # Step 3: Extract output
+    tba.measure(4, 0)  # LSB Sum
+    tba.measure(7, 1)  # MSB Sum
+    tba.measure(10, 2) # Carry
+
+    return tba
 
 # Input checkboxes for each bit of the two numbers
 a0 = st.checkbox("Input A0 (1st number, LSB)")
@@ -56,9 +63,6 @@ b1 = st.checkbox("Input B1 (2nd number, MSB)")
 # Create and display the quantum circuit
 qc = create_2bit_adder_circuit(a0, a1, b0, b1)
 st.pyplot(qc.draw(output='mpl'))
-
-# Button to run the quantum circuit
-# ... rest of your code ...
 
 # Button to run the quantum circuit
 if st.button('Calculate Sum'):
