@@ -1,5 +1,5 @@
 import streamlit as st
-from qiskit import QuantumCircuit, Aer, transpile
+from qiskit import QuantumRegister, QuantumCircuit, ClassicalRegister, Aer, transpile
 from qiskit.visualization import plot_histogram
 
 # Streamlit Title
@@ -7,7 +7,25 @@ st.title("Quantum 2-Bit Binary Adder")
 
 # Function to create a 2-bit binary adder circuit
 def create_2bit_adder_circuit(a0, a1, b0, b1):
-    tba = QuantumCircuit(11, 3)
+
+    # Create quantum registers with names
+    qr1 = QuantumRegister(1, name="1 0")
+    qr2 = QuantumRegister(1, name="2 0")
+    qr3 = QuantumRegister(1, name="1 1")
+    qr4 = QuantumRegister(1, name="2 1")
+    qr5 = QuantumRegister(1, name="1 carry")
+    qr6 = QuantumRegister(1, name="1 sum")
+    qr7 = QuantumRegister(1, name="2 carry")
+    qr8 = QuantumRegister(1, name="1sum+2carry carry")
+    qr9 = QuantumRegister(1, name="1sum+2carry sum")
+    qr10 = QuantumRegister(1, name="2 sum")
+    qr11 = QuantumRegister(1, name="1sum+2carry sum+2sum")
+
+    # Create classical register
+    cr = ClassicalRegister(3, name="cbit")
+
+    # Create quantum circuit with the quantum and classical registers
+    tba = QuantumCircuit(qr1, qr2, qr3, qr4, qr5, qr6, qr7, qr8, qr9, qr10, qr11, cr)
 
     # Step 1: Encode input
     if a0: tba.x(0) # LSB of first number
