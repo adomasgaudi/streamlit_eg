@@ -10,15 +10,17 @@ import streamlit as st
 from qiskit_ibm_runtime import QiskitRuntimeService, Sampler
 from random import randint
 from math import gcd # greatest common divisor
+import streamlit as st
 
 MY_TOKEN = 'd79a58cef57641543701b758b34f4eab6b344d1d52a9e18e3d42695dc153028be326695f1388c5b276d36c4a963d1ba15be8ed096a3cfe79be3559411529758c'
 
 
+st.write('Shors Algorithm')
 N = 15
 
 np.random.seed(1) # This is to make sure we get reproduceable results
 a = randint(2, 15)
-print(a)
+st.write(a)
 gcd(a, N)
 
 def c_amod15(a, power):
@@ -126,6 +128,7 @@ for phase in measured_phases:
 headers=["Phase", "Fraction", "Guess for r"]
 df = pd.DataFrame(rows, columns=headers)
 print(df)
+st.write(df)
 
 def a2jmodN(a, j, N):
     """Compute a^{2^j} (mod N) by repeated squaring"""
@@ -159,20 +162,25 @@ def qpe_amod15(a):
     job = aer_sim.run(transpile(qc, aer_sim), shots=1, memory=True)
     readings = job.result().get_memory()
     print("Register Reading: " + readings[0])
+    st.write("Register Reading: " + readings[0])
     phase = int(readings[0],2)/(2**N_COUNT)
     print(f"Corresponding Phase: {phase}")
+    st.write(f"Corresponding Phase: {phase}")
     return phase
 
 phase = qpe_amod15(a) # Phase = s/r
 print(f"Corresponding Phase: {phase}")
+st.write(f"Corresponding Phase: {phase}")
 Fraction(phase).limit_denominator(15)
 
 frac = Fraction(phase).limit_denominator(15)
 s, r = frac.numerator, frac.denominator
 print(r)
+st.write(r)
 
 guesses = [gcd(a**(r//2)-1, N), gcd(a**(r//2)+1, N)]
 print(guesses)
+st.write(guesses)
 
 a = 7
 FACTOR_FOUND = False
@@ -180,18 +188,22 @@ ATTEMPT = 0
 while not FACTOR_FOUND:
     ATTEMPT += 1
     print(f"\nATTEMPT {ATTEMPT}:")
+    st.write(f"\nATTEMPT {ATTEMPT}:")
     phase = qpe_amod15(a) # Phase = s/r
     frac = Fraction(phase).limit_denominator(N)
     r = frac.denominator
     print(f"Result: r = {r}")
+    st.write(f"Result: r = {r}")
     if phase != 0:
         # Guesses for factors are gcd(x^{r/2} ±1 , 15)
         guesses = [gcd(a**(r//2)-1, N), gcd(a**(r//2)+1, N)]
         print(f"Guessed Factors: {guesses[0]} and {guesses[1]}")
+        st.write(f"Guessed Factors: {guesses[0]} and {guesses[1]}")
         for guess in guesses:
             if guess not in [1,N] and (N % guess) == 0:
                 # Guess is a factor!
                 print(f"*** Non-trivial factor found: {guess} ***")
+                st.write(f"*** Non-trivial factor found: {guess} ***")
                 FACTOR_FOUND = True
 
 # The cell below repeats the algorithm until at least one factor of 15
