@@ -1,5 +1,5 @@
 import streamlit as st
-from functions2 import run_shors_algorithm, plot_histogram
+from quantum.shor2.main import run_shors_algorithm, plot_histogram
 
 # Constants
 N_COUNT = 8  # Number of counting qubits
